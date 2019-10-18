@@ -1,0 +1,254 @@
+---
+title: "R tutorial: Choose the Most Appropriate Test"
+author: "LearyLab"
+date: "10/18/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+This tutorial will help you to determine the best test for your data. The example data set we are using here can be downloaded at [Box](https://missouri.box.com/s/70v91qllsnax3fzwyci2gam30llnu7rh) or [Github](https://raw.githubusercontent.com/zhengyes/rt/master/rExampleData.csv). The data are continous and describe values of 6 kinds of biomarkers for 144 animals by treatment.
+
+
+### Flowchart
+
+Here is the flowcahrt of tests
+
+```{r grViz, echo=FALSE}
+library(DiagrammeR)
+grViz("digraph flowchart{
+node [fontname=Helvetica, shape = rounded]
+tab6 [label = '@@6']
+tab7 [label = '@@7']
+tab8 [label = '@@8']
+tab10 [label = '@@10']
+tab11 [label = '@@11']
+tab12 [label = '@@12']
+node [fontname = Helvetica, shape=oval]
+tab2 [label = '@@2']
+tab5 [label = '@@5']
+tab9 [label = '@@9']
+node [fontname = Helvetica, shape = plaintext]
+tab1 [label = '@@1']
+tab3 [label = '@@3']
+tab4 [label = '@@4']
+tab1->tab2;
+tab2->tab3;
+tab3->tab5[label = '2 groups'];
+tab5->tab6;
+tab5->tab7;
+tab3->tab8[label = '2+ groups'];
+tab2->tab4;
+tab4->tab9[label = '2 groups'];
+tab9->tab10;
+tab9->tab11;
+tab4->tab12[label='2+ groups'];
+}
+  [1]: 'Continuous Data'
+  [2]: 'Normally Distributed or Skewed'
+  [3]: 'Normally distributed'
+  [4]: 'Skewed'
+  [5]: 'Paired or Unpaired'
+  [6]: 'Two sample t test'
+  [7]: 'Paired t test'
+  [8]: 'ANOVA (post hoc)'
+  [9]: 'Paired or Unpaired'
+  [10]: 'Wilcoxon Rank Sum'
+  [11]: 'Wilcoxon Signed Rank'
+  [12]: 'Kruskal-Waliis (post hoc)'
+      ")
+
+```
+### What is hypothesis
+Statistical hypothesis is an assumption about a population parameter. We can check whether or not a sample data is consitent with a statistical hypothesis, if not, the hypothesis is rejected.
+
+There are two types of hypothesis. Null hypothesis H0 and alternative hypothesis Ha. 
+Ha
+accept
+alpha
+significant
+meaning
+
+### How to import data
+
+After downloading the data to your computer, you need to find the path of the data file and import the data to R.
+
+1. You can type the following code in console, then a "select file" window will pop up. Find the file you want to import and click "Open".
+```{r eval=FALSE}
+file.choose()
+```
+
+2. If you know the path of the file, you can also use read.csv function to read the .csv file into R. Type the following code in console but replace path between quotations with your file path.
+```{r}
+biomarker =  read.csv("C:\\Users\\zs7hm\\Desktop\\rExampleData.csv")
+```
+
+
+### Normality check
+Many statistical tests require data to be normally distributed, this can be tested using a normality test, for example, Shapiro test. 
+The null hypothesis of normality test is that there is no significant departure from normality. When the p is greater than .05, it fails to reject the null hypothesis and thus the assumption holds.
+
+We are going to test if biomarker MMP3 with treatment 0 is normally distributed.
+
+```{r}
+# "which(biomarker$Treatment==0)" choose all subjects with treatment = 0, "MMP3"
+# choose the MMP3 column.
+shapiro.test(biomarker[which(biomarker$Treatment==0),"MMP3"])
+```
+The p-value = 0.3694, which is above 0.05. It suggests MMP3 with treatment 0 follows normal distrbution.
+
+
+### Paired or unpaired
+
+#### paired
+
+If you collect two measurements on the same experimental unit, then each pair of observations is closely related. In that case, you should use the paired t-test to test the mean difference between these dependent observations if your data is normally distributed and has same variance. If your data does not meet the normality or homogeneity of variance assumption, you should use nonparametric method Wilcoxon Signed Rank test.
+
+#### Unpaired
+
+If you randomly sample each set of items separately, under different conditions, the samples are independent. The measurements in one sample have no bearing on the measurements in the other sample, then the samples are unpaired. You should use the 2-sample t test to compare the difference in the means if your data is normally distributed and have equal variance. If your data does not meet the normality or homogeneity of variance assumption, use nonparametric method Wilcoxon Rank Sum test.
+
+it is important to use the correct test to prevent wrong results. 
+
+
+### Two sample t test
+1. Assumptions
+    + Data are continous
+    + Samples are simply random samples from their respective populations, which means taht each individual in the population has an equal chance of being selected in the sample. 
+    + Two samples are independent
+    + Data follow normal probability distribution
+    + Variances of the two populations are equal
+
+2. Goal: We want to compare the means of MMP3 with treatment 0 and treatment 5, to see if they are equal. We need to check assumptions first, if assumptions are met, we then apply t test.
+
+3. Code:
+```{r}
+# Normality check for treatment 5. Check for treatment 0 has been done in last step 
+shapiro.test(biomarker[biomarker$Treatment==5,"MMP3"])
+
+# Equal variance test
+var.test(biomarker[biomarker$Treatment==0,"MMP3"], biomarker[biomarker$Treatment==5,"MMP3"])
+
+# Two sample t test. (var.equal default is False, so you cannot ignore var.test = T) 
+t.test(biomarker[biomarker$Treatment==0,"MMP3"], biomarker[biomarker$Treatment==5,"MMP3"], var.equal = T)
+```
+
+4. Interpret result:
+Shapiro tests show that MMP3 with treatment 0 and 5 are both normal. Equal variance test shows that variances are equal for two groups. Finally, two sample t test p-value = 0.2594, which is above 0.05. The conclusion is fail to reject the null hypothesis and that the means of two treatment groups are not significantly different.
+
+5. Note:
+Checking the assumptions is very important. If the normality check or the equal variance check fails, you need to use non-parametric methods Wilcoxon Rank Sum test, which will be introduced later. If only the equal variance check fails, you can use Welch's t test. You need to delete "var.equal = T" or change it to "var.equal = F" when you want to apply Welch's t test.
+
+### Paired t test
+1. Assumptions
+    + Data (differences for the matched-pairs) are continous
+    + Data follow a normal probability distribution.
+    + The sample of pairs is a simple random sample from its population. 
+    
+2. Goal:The null hypothesis for paired t test assumes that the **mean difference of two groups** equals to 0. We want to check whether or not the corresponding MMP3 and CTXII for each animal for treatment 0 have the same mean. 
+
+3. Code:
+```{r}
+# Normality check for the difference 
+shapiro.test(biomarker[biomarker$Treatment==0,"MMP3"] - biomarker[biomarker$Treatment==0,"CTXII"])
+
+# Paired t test. (paired = F is default, you cannot ignore paired = T)
+t.test(biomarker[biomarker$Treatment==0,"MMP3"], biomarker[biomarker$Treatment==0,"CTXII"],paired = T)
+```
+
+4. Interpret result:
+Shapiro test shows that the difference between two groups follows normal, so we can continue to use paired t test. The paired t test p-value = 2.2e-16, which is below 0.05. The conclusion is to reject the null hypothesis and that the means of MMP3 and CTXII are significantly different.
+
+5. Note:
+Checking the assumptions is very important. If the normality check fails, you need to use non-parametric methods Wilcoxon Signed Rank test, which will be introduced later.
+
+### ANOVA (post hoc)
+
+1. Assumptions
+    + Continuous data
+    + Each group is normally distributed
+    + Variances of populations are equal
+    + Groups are independent
+    + Each group is a simple random sample from its population
+    
+2. Goal: ANOVA can make multiple comparison among more than two groups to see if all of them have the same mean. The post hoc test can tell us which group has different population mean. We want to compare means of three treatments for MMP3.
+
+3. Code:
+```{r}
+# Normality check
+shapiro.test(biomarker[biomarker$Treatment==50,"MMP3"])
+
+# Equal variance check. (You can still use var.test() which is F test, but you need to compare all the pairs. Using Bartlett test can make things easier because it makes multiple comparisons)
+bartlett.test(MMP3~Treatment,data=biomarker)
+
+# ANOVA (Treatment is just integer in the data set, we need to transfer it to factor)
+a=aov(MMP3~as.factor(Treatment),data=biomarker)
+summary(a)
+
+# Post hoc analysis. Tukey is just one of the post hoc procedures which is commonly used.
+TukeyHSD(a)
+```
+
+4. Interpret result:
+Shapiro test shows that all three groups have the same mean. Equal variance assumption is satisfied since all three groups have the same variance. Anova test p-value = 0.00607, which is below 0.05. The conclusion is to reject the null hypothesis, so the means of three groups are not all the same, at least one group has a different mean. The Tukey test points out treatment 50 and treatment 5 have different means. The p-value = 0.0047412, which is below 0.05, and we can find that mean of treatment 50 is greater than mean of treatment 5.
+
+5. Note:
+Checking the assumptions is very important. If the normality check or equal variance assumption fails, you need to use non-parametric methods Kruskal-Wallis test, which will be introduced later.
+
+### Wilcoxon Rank Sum (MannWhitney U test)
+1. Goal:The This test is a nonparametric alternative to the equal-variance t-test for use when the assumption of normality is not
+valid. This test uses the ranks of the values rather than the values themselves. We want to see if there is a difference between MMP1 and MMP2 for treatment 0.
+
+2. Code:
+```{r}
+# Want to show normality is not satisfied
+shapiro.test(biomarker[biomarker$Treatment==5,"MMP2"])
+shapiro.test(biomarker[biomarker$Treatment==0,"MMP2"])
+
+# Wilcoxon rank sum
+wilcox.test(biomarker[biomarker$Treatment==0,"MMP2"],biomarker[biomarker$Treatment==5,"MMP2"])
+```
+
+3. Interpret result:
+Since MMP2 is not normal for both treatments, we cannot use two sample t test. The Wilcoxon Rank Sum test p-value = 3.937e-05, which is below 0.05. We conclude that values of MMP2 treatment 0 and 5 are significantly different.
+
+### Wilcoxon Signed Rank
+
+1. Goal:This nonparametric test makes use of the sign and the magnitude of the rank of the differences (paired differences minus the hypothesized difference). It is one of the most commonly used nonparametric alternatives to the paired t-test. We want to compare corresponding MMP1 and MMP2 values for treatment 0. 
+
+2. Code:
+```{r}
+# Want to show normality is not satisfied
+shapiro.test(biomarker[biomarker$Treatment==0,"MMP1"])
+shapiro.test(biomarker[biomarker$Treatment==0,"MMP2"])
+
+# Wilcoxon signed rank
+wilcox.test(biomarker[biomarker$Treatment==0,"MMP1"],biomarker[biomarker$Treatment==0,"MMP2"],paired = T)
+```
+
+3. Interpret result:
+Since MMP2 is not normal, we cannot use paired t test. The Wilcoxon Signed Rank test p-value = 7.105e-15, which is below 0.05. We conclude that values of MMP2 and MMP1 are significantly different for treatment 0.
+
+### Kruskal-Wallis (post hoc)
+
+1. Goal: Kruskal-Wallis test by rank is a non-parametric alternative to one-way ANOVA test, which extends the two-samples Wilcoxon test in the situation where there are more than two groups. It’s recommended when the assumptions of ANOVA test are not met. We want to compare three treatment groups of MMP2. The post hoc test can tell us which group is different.
+
+2. Code:
+```{r}
+# Kruskal
+kruskal.test(MMP2~as.factor(Treatment),data=biomarker)
+
+# Post hoc dunn test
+library(FSA)
+dunnTest(MMP2~as.factor(Treatment),data=biomarker,method = "bh")
+```
+
+3. Interpret result:
+The p-value for Kruskal-Wallis test = 0.0004431, which is below 0.05. We conclude that not all groups have the same mean, at least one group has a different mean. The Dunn test p-values for 0-5 and 5-50 comparisons are less than 0.05, which indicates that treatment 0 and 5 have different means, treatment 5 and 50 also have different means.
+
+
+
+
+
