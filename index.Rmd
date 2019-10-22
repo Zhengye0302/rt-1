@@ -197,7 +197,7 @@ shapiro.test(biomarker[biomarker$Treatment==50,"MMP3"])
 # Equal variance check. (You can still use var.test() which is F test, but you need to compare all the pairs. Using Bartlett test can make things easier because it makes multiple comparisons)
 bartlett.test(MMP3~Treatment,data=biomarker)
 ```
-
+The p-value = 0.4782 > 0.05, so we cannot reject the null hypothesis H0: three groups have equal variance. 
 ```{r,echo=FALSE}
 bartlett.test(MMP3~Treatment,data=biomarker)
 ```
@@ -207,6 +207,7 @@ bartlett.test(MMP3~Treatment,data=biomarker)
 a=aov(MMP3~as.factor(Treatment),data=biomarker)
 summary(a)
 ```
+You need to transfer treatment variable into factor. The p-value = 0.00607 < 0.05, so we can reject the null hypothesis H0: all three groups have the same mean and conclude that there is at least one group differ from others. 
 ```{r,echo=FALSE}
 a=aov(MMP3~as.factor(Treatment),data=biomarker)
 summary(a)
@@ -216,68 +217,90 @@ summary(a)
 # Post hoc analysis. Tukey is just one of the post hoc procedures which is commonly used.
 TukeyHSD(a)
 ```
+The p-value for 50-5 comparison is 0.0047412 < 0.05, the other two comparisons have p-value greater than 0.05. So, the Tukey test reveals that group 50 and 5 are significantly different. Because the lower bound and upper bound for 95% confidence interval are both greater than 0 (lwr = 5.260493, upr = 35.086174), we can conclude that mean of treatment 50 group is greater than mean of treatment 5 group. We also conclude that there is no significant difference between neither treatment 5 and treatment 0, nor treatment 50 and treatment 0.
 ```{r,echo=FALSE}
 TukeyHSD(a)
 ```
 
-4. Interpret result:
-Shapiro test shows that all three groups have the same mean. Equal variance assumption is satisfied since all three groups have the same variance. Anova test p-value = 0.00607, which is below 0.05. The conclusion is to reject the null hypothesis, so the means of three groups are not all the same, at least one group has a different mean. The Tukey test points out treatment 50 and treatment 5 have different means. The p-value = 0.0047412, which is below 0.05, and we can find that mean of treatment 50 is greater than mean of treatment 5.
-
-5. Note:
-Checking the assumptions is very important. If the normality check or equal variance assumption fails, you need to use non-parametric methods Kruskal-Wallis test, which will be introduced later.
+4. Note:
+Checking the assumptions is very important. If the normality check or equal variance assumption fails, you need to use non-parametric methods Kruskal-Wallis test, which will be introduced later. In the code above, you need to transfer treatments to factor variables.
 
 ### Wilcoxon Rank Sum (MannWhitney U test)
-1. Goal:The This test is a nonparametric alternative to the equal-variance t-test for use when the assumption of normality is not
-valid. This test uses the ranks of the values rather than the values themselves. We want to see if there is a difference between MMP1 and MMP2 for treatment 0.
+Wilcoxon rank sum test is used to test whether two samples are likely to derive from the same population (i.e., that the two populations have the same shape). you can also interpret this test as comparing the medians between the two populations. The null hypothesis H0: two populations distributions are equal, Ha: two populations distributions are not equal.
+
+1. Goal:This test is a nonparametric alternative to the equal-variance t-test for use when the assumption of normality is not valid. This test uses the ranks of the values rather than the values themselves. We want to see if there is a difference between MMP1 and MMP2 for treatment 0.
 
 2. Code:
-```{r}
+```{r,eval=FALSE}
 # Want to show normality is not satisfied
 shapiro.test(biomarker[biomarker$Treatment==5,"MMP2"])
 shapiro.test(biomarker[biomarker$Treatment==0,"MMP2"])
+```
+The Shapiro test shows that both groups are not normally distributed because their p-values are both lower than 0.05.
+```{r,echo=FALSE}
+shapiro.test(biomarker[biomarker$Treatment==5,"MMP2"])
+shapiro.test(biomarker[biomarker$Treatment==0,"MMP2"])
+```
 
+```{r,eval=FALSE}
 # Wilcoxon rank sum
 wilcox.test(biomarker[biomarker$Treatment==0,"MMP2"],biomarker[biomarker$Treatment==5,"MMP2"])
 ```
-
-3. Interpret result:
-Since MMP2 is not normal for both treatments, we cannot use two sample t test. The Wilcoxon Rank Sum test p-value = 3.937e-05, which is below 0.05. We conclude that values of MMP2 treatment 0 and 5 are significantly different.
+The p-value is 3.937e-05, which is below 0.05. We conclude that MMP2 treatment 0 and 5 are significantly different.
+```{r,echo=FALSE}
+wilcox.test(biomarker[biomarker$Treatment==0,"MMP2"],biomarker[biomarker$Treatment==5,"MMP2"])
+```
 
 ### Wilcoxon Signed Rank
 
-1. Goal:This nonparametric test makes use of the sign and the magnitude of the rank of the differences (paired differences minus the hypothesized difference). It is one of the most commonly used nonparametric alternatives to the paired t-test. We want to compare corresponding MMP1 and MMP2 values for treatment 0. 
+This nonparametric test makes use of the sign and the magnitude of the rank of the differences (paired differences minus the hypothesized difference). It is one of the most commonly used nonparametric alternatives to the paired t-test. H0: difference between the pairs follows a symmetric distribution around zero. Ha: difference between the pairs does not follow a symmetric distribution around zero.
+
+1. Goal: We want to compare corresponding MMP1 and MMP2 values for treatment 0. 
 
 2. Code:
-```{r}
+```{r,eval=FALSE}
 # Want to show normality is not satisfied
 shapiro.test(biomarker[biomarker$Treatment==0,"MMP1"])
 shapiro.test(biomarker[biomarker$Treatment==0,"MMP2"])
+```
+Shapiro test p-value for MMP2 is 2.326e-05 < 0.05, so MMP2 is not normally distributed. 
+```{r,echo=FALSE}
+shapiro.test(biomarker[biomarker$Treatment==0,"MMP1"])
+shapiro.test(biomarker[biomarker$Treatment==0,"MMP2"])
+```
 
+```{r,eval=FALSE}
 # Wilcoxon signed rank
 wilcox.test(biomarker[biomarker$Treatment==0,"MMP1"],biomarker[biomarker$Treatment==0,"MMP2"],paired = T)
 ```
-
-3. Interpret result:
-Since MMP2 is not normal, we cannot use paired t test. The Wilcoxon Signed Rank test p-value = 7.105e-15, which is below 0.05. We conclude that values of MMP2 and MMP1 are significantly different for treatment 0.
+The Wilcoxon Signed Rank test p-value = 7.105e-15, which is below 0.05. We conclude that MMP2 and MMP1 are significantly different for treatment 0.
+```{r,echo=FALSE}
+wilcox.test(biomarker[biomarker$Treatment==0,"MMP1"],biomarker[biomarker$Treatment==0,"MMP2"],paired = T)
+```
 
 ### Kruskal-Wallis (post hoc)
 
-1. Goal: Kruskal-Wallis test by rank is a non-parametric alternative to one-way ANOVA test, which extends the two-samples Wilcoxon test in the situation where there are more than two groups. It’s recommended when the assumptions of ANOVA test are not met. We want to compare three treatment groups of MMP2. The post hoc test can tell us which group is different.
+Kruskal-Wallis test by rank is a non-parametric alternative to one-way ANOVA test, which extends the two-samples Wilcoxon test in the situation where there are more than two groups. It’s recommended when the assumptions of ANOVA test are not met. H0: medians of all groups are equal, Ha: at least one population median is different from at least one other group.
+
+1. Goal: We want to compare three treatment groups of MMP2. The post hoc test can tell us which group is different.
 
 2. Code:
-```{r}
+```{r,eval=FALSE}
 # Kruskal
 kruskal.test(MMP2~as.factor(Treatment),data=biomarker)
+```
+The p-value for Kruskal-Wallis test = 0.0004431, which is below 0.05. We conclude that not all groups have the same median, at least one group has a different median. 
+```{r,echo=FALSE}
+kruskal.test(MMP2~as.factor(Treatment),data=biomarker)
+```
 
+```{r,eval=FALSE}
 # Post hoc dunn test
 library(FSA)
 dunnTest(MMP2~as.factor(Treatment),data=biomarker,method = "bh")
 ```
-
-3. Interpret result:
-The p-value for Kruskal-Wallis test = 0.0004431, which is below 0.05. We conclude that not all groups have the same mean, at least one group has a different mean. The Dunn test p-values for 0-5 and 5-50 comparisons are less than 0.05, which indicates that treatment 0 and 5 have different means, treatment 5 and 50 also have different means.
-
-
-
-
-
+The Dunn test p-values for 0-5 and 5-50 comparisons are less than 0.05, which indicates that treatment 0 and 5 have different medians, treatment 5 and 50 also have different medians.
+```{r,echo=FALSE}
+library(FSA)
+dunnTest(MMP2~as.factor(Treatment),data=biomarker,method = "bh")
+```
