@@ -12,7 +12,7 @@
 
 <meta name="author" content="Leary Ortho Biostats Lab" />
 
-<meta name="date" content="2019-10-21" />
+<meta name="date" content="2019-10-23" />
 
 <title>R tutorial: Choose the Most Appropriate Test</title>
 
@@ -2830,17 +2830,16 @@ summary {
 
 <h1 class="title toc-ignore">R tutorial: Choose the Most Appropriate Test</h1>
 <h4 class="author">Leary Ortho Biostats Lab</h4>
-<h4 class="date">10/21/2019</h4>
+<h4 class="date">10/23/2019</h4>
 
 </div>
 
 
-<p>This tutorial will help you to determine the best test for your data. The example data set we are using here can be downloaded at <a href="https://missouri.box.com/s/70v91qllsnax3fzwyci2gam30llnu7rh">Box</a> or <a href="https://raw.githubusercontent.com/zhengyes/rt/master/rExampleData.csv">Github</a>. The data are continous and describe values of 6 kinds of biomarkers for 144 animals by treatment.</p>
 <div id="flowchart" class="section level3">
 <h3>Flowchart</h3>
 <p>Here is the flowcahrt of choosing test.</p>
-<div id="htmlwidget-c98c892d6db907378c7e" style="width:672px;height:480px;" class="DiagrammeR html-widget"></div>
-<script type="application/json" data-for="htmlwidget-c98c892d6db907378c7e">{"x":{"diagram":"\ngraph TB\n  A[Continuous Data]-->B{Normally Distributed<br> or Skewed}\n  B-->C[Normally Distributed]\n  B-->H[Skewed]\n  C-->|2 groups| D{Paired<br>or Unpaired}\n  C-->|2+ groups| G[\"ANOVA (post hoc)\"]\n  D-->|unpaired| E[Two sample t test]\n  D-->|paired| F[Paired t test]\n  H-->|2 groups| I{Paired<br> or Unpaired}\n  I-->|unpaired| J[Wilcoxon Rank Sum]\n  I-->|paired| K[Wilcoxon Signed Rank]\n  H-->|2+ groups|L[\"Kruskal-Wallis (post hoc)\"]\n  \n  style G fill:#c1f5f4\n  style E fill:#c1f5f4\n  style F fill:#c1f5f4\n  style J fill:#c1f5f4\n  style K fill:#c1f5f4\n  style L fill:#c1f5f4\n"},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-4329881e4a2a7a0e6a07" style="width:672px;height:480px;" class="DiagrammeR html-widget"></div>
+<script type="application/json" data-for="htmlwidget-4329881e4a2a7a0e6a07">{"x":{"diagram":"\ngraph TB\n  A[Continuous Data]-->B{Normally Distributed<br> or Skewed}\n  B-->C[Normally Distributed]\n  B-->H[Skewed]\n  C-->|2 groups| D{Paired<br>or Unpaired}\n  C-->|2+ groups| G[\"ANOVA (post hoc)\"]\n  D-->|unpaired| E[Two sample t test]\n  D-->|paired| F[Paired t test]\n  H-->|2 groups| I{Paired<br> or Unpaired}\n  I-->|unpaired| J[Wilcoxon Rank Sum]\n  I-->|paired| K[Wilcoxon Signed Rank]\n  H-->|2+ groups|L[\"Kruskal-Wallis (post hoc)\"]\n  \n  style G fill:#c1f5f4\n  style E fill:#c1f5f4\n  style F fill:#c1f5f4\n  style J fill:#c1f5f4\n  style K fill:#c1f5f4\n  style L fill:#c1f5f4\n"},"evals":[],"jsHooks":[]}</script>
 </div>
 <div id="what-is-hypothesis" class="section level3">
 <h3>What is hypothesis</h3>
@@ -2851,20 +2850,22 @@ summary {
 </div>
 <div id="how-to-import-data" class="section level3">
 <h3>How to import data</h3>
-<p>After downloading the data to your computer, you need to find the path of the data file and import the data to R.</p>
+<p>This tutorial will help you to determine the best test for your data. The example data we are using can be downloaded at <a href="https://missouri.box.com/s/70v91qllsnax3fzwyci2gam30llnu7rh">Box</a> or <a href="https://raw.githubusercontent.com/zhengyes/rt/master/rExampleData.csv">Github</a>. The continous data describe values of 6 kinds of biomarkers for 144 animals by treatment.</p>
+<p>After downloading the data to your computer, you need to find the path of the data file on your computer and import the data to R.</p>
 <ol style="list-style-type: decimal">
-<li>You can type the following code in console, then a “select file” window will pop up. Find the file you want to import and click “Open”.</li>
+<li>You can type the following code in console, then a “select file” window will pop up. Find the file you want to import and click “Open”, the path will display in console window.</li>
 </ol>
 <pre class="r"><code>file.choose()</code></pre>
 <ol start="2" style="list-style-type: decimal">
-<li>Now you know the path of the file, you can use read.csv function to read the .csv file into R. Type the following code in console but replace path between quotations with your file path. The new data set will be named “biomarker”.</li>
+<li>Now you have the path of the file, you can use read.csv function to read the .csv file into R. Type the following code in console but replace path between quotations with your file path. The new data set will be named “biomarker”.</li>
 </ol>
 <pre class="r"><code>biomarker = read.csv(&quot;C:\\Users\\zs7hm\\Desktop\\rExampleData.csv&quot;)</code></pre>
 </div>
 <div id="normality-check" class="section level3">
 <h3>Normality check</h3>
-<p>Many statistical tests require data to be normally distributed, this can be tested using a normality test, for example, Shapiro test. The null hypothesis of normality test is that there is no significant departure from normality. When the p is greater than .05, it fails to reject the null hypothesis and thus the assumption holds. Parametric methods (two sample t test, paired t test, ANOVA) need normality check, while the non-parametric methods (Wilcoxon rank sum, signed rank, Kruskal) can be used when data failed normality check.</p>
-<p>Here is an example. We are going to use Shapiro test to test if biomarker MMP3 with treatment 0 is normally distributed. The null hypothesis of Shapiro test H0: data are normally distributed.</p>
+<p>Many statistical tests require data to be normally distributed, this can be tested using a Shapiro normality test.</p>
+<p>The null hypothesis of normality test is that there is no significant departure from normality. When the p-value is greater than 0.05, it fails to reject the null hypothesis and thus the assumption holds. Parametric methods (two sample t test, paired t test, ANOVA) need normality check, while the non-parametric methods (Wilcoxon rank sum, signed rank, Kruskal) can be used when data failed normality check.</p>
+<p>Here is an example. We are going to use Shapiro test to check if biomarker MMP3 with treatment 0 is normally distributed. The null hypothesis of Shapiro test H0: data are normally distributed.</p>
 <pre class="r"><code># &quot;which(biomarker$Treatment==0)&quot; choose all subjects with treatment = 0, &quot;MMP3&quot; choose the MMP3 column.
 shapiro.test(biomarker[which(biomarker$Treatment==0),&quot;MMP3&quot;])</code></pre>
 <p>The p-value = 0.3694, which is above 0.05. The following result suggests MMP3 with treatment 0 follows normal distrbution.</p>
@@ -2898,7 +2899,7 @@ shapiro.test(biomarker[which(biomarker$Treatment==0),&quot;MMP3&quot;])</code></
 <li>Data follow normal probability distribution</li>
 <li>Variances of the two populations are equal</li>
 </ul></li>
-<li><p>Goal: We want to compare the means of MMP3 with treatment 0 and treatment 5, to see if they are equal. We need to check assumptions first, if assumptions are met, we then apply two sample t test.</p></li>
+<li><p>Goal: We want to compare the means of MMP3 with treatment 0 and treatment 5 to see if they are equal. We need to check assumptions first, if assumptions are met, we then apply two sample t test.</p></li>
 <li><p>Code:</p></li>
 </ol>
 <p><strong>Normality check:</strong></p>
@@ -2946,7 +2947,7 @@ t.test(biomarker[biomarker$Treatment==0,&quot;MMP3&quot;], biomarker[biomarker$T
 </div>
 <div id="paired-t-test" class="section level3">
 <h3>Paired t test</h3>
-<p>Paired t test is used to determine whether the mean difference between two sets of observations is zero. The null hypothesis H0: <span class="math inline">\(\mu_d\)</span> = 0, alternative hypotheis Ha:<span class="math inline">\(\mu_d\)</span> <span class="math inline">\(\neq\)</span> 0. Null hypothesis is rejected when p-value less than 0.05. Paired t test is a parametric method, which means that the assumptions must be satisfied before applying it. If assumptions cannot be met, non-parametric methods can be used.</p>
+<p>Paired t test is used to determine whether or not the <strong>mean difference between two sets of observations (<span class="math inline">\(\mu_d\)</span>)</strong> is zero. The null hypothesis H0: <span class="math inline">\(\mu_d\)</span> = 0, alternative hypotheis Ha:<span class="math inline">\(\mu_d\)</span> <span class="math inline">\(\neq\)</span> 0. Null hypothesis is rejected when p-value less than 0.05. Paired t test is a parametric method, which means that the assumptions must be satisfied before applying it. If assumptions cannot be met, non-parametric methods can be used.</p>
 <ol style="list-style-type: decimal">
 <li><p>Assumptions</p>
 <ul>

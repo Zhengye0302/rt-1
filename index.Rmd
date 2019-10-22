@@ -1,7 +1,7 @@
 ---
 title: "R tutorial: Choose the Most Appropriate Test"
 author: "Leary Ortho Biostats Lab"
-date: "10/21/2019"
+date: "10/23/2019"
 output: html_document
 ---
 
@@ -9,7 +9,6 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-This tutorial will help you to determine the best test for your data. The example data set we are using here can be downloaded at [Box](https://missouri.box.com/s/70v91qllsnax3fzwyci2gam30llnu7rh) or [Github](https://raw.githubusercontent.com/zhengyes/rt/master/rExampleData.csv). The data are continous and describe values of 6 kinds of biomarkers for 144 animals by treatment.
 
 ### Flowchart
 
@@ -51,23 +50,27 @@ If the test p-value is less than the significant level (usually 0.05) then we re
 
 ### How to import data
 
-After downloading the data to your computer, you need to find the path of the data file and import the data to R.
+This tutorial will help you to determine the best test for your data. The example data we are using can be downloaded at [Box](https://missouri.box.com/s/70v91qllsnax3fzwyci2gam30llnu7rh) or [Github](https://raw.githubusercontent.com/zhengyes/rt/master/rExampleData.csv). The continous data describe values of 6 kinds of biomarkers for 144 animals by treatment.
 
-1. You can type the following code in console, then a "select file" window will pop up. Find the file you want to import and click "Open".
+After downloading the data to your computer, you need to find the path of the data file on your computer and import the data to R.
+
+1. You can type the following code in console, then a "select file" window will pop up. Find the file you want to import and click "Open", the path will display in console window.
+
 ```{r eval=FALSE}
 file.choose()
 ```
 
-2. Now you know the path of the file, you can use read.csv function to read the .csv file into R. Type the following code in console but replace path between quotations with your file path. The new data set will be named "biomarker".
+2. Now you have the path of the file, you can use read.csv function to read the .csv file into R. Type the following code in console but replace path between quotations with your file path. The new data set will be named "biomarker".
 ```{r}
 biomarker = read.csv("C:\\Users\\zs7hm\\Desktop\\rExampleData.csv")
 ```
 
 ### Normality check
-Many statistical tests require data to be normally distributed, this can be tested using a normality test, for example, Shapiro test. 
-The null hypothesis of normality test is that there is no significant departure from normality. When the p is greater than .05, it fails to reject the null hypothesis and thus the assumption holds. Parametric methods (two sample t test, paired t test, ANOVA) need normality check, while the non-parametric methods (Wilcoxon rank sum, signed rank, Kruskal) can be used when data failed normality check.
+Many statistical tests require data to be normally distributed, this can be tested using a Shapiro normality test.
 
-Here is an example. We are going to use Shapiro test to test if biomarker MMP3 with treatment 0 is normally distributed. The null hypothesis of Shapiro test H0: data are normally distributed.
+The null hypothesis of normality test is that there is no significant departure from normality. When the p-value is greater than 0.05, it fails to reject the null hypothesis and thus the assumption holds. Parametric methods (two sample t test, paired t test, ANOVA) need normality check, while the non-parametric methods (Wilcoxon rank sum, signed rank, Kruskal) can be used when data failed normality check.
+
+Here is an example. We are going to use Shapiro test to check if biomarker MMP3 with treatment 0 is normally distributed. The null hypothesis of Shapiro test H0: data are normally distributed.
 
 ```{r, eval=FALSE}
 # "which(biomarker$Treatment==0)" choose all subjects with treatment = 0, "MMP3" choose the MMP3 column.
@@ -100,7 +103,7 @@ Two sample t test is used to determine if two population means $\mu_1$ and $\mu_
     + Data follow normal probability distribution
     + Variances of the two populations are equal
 
-2. Goal: We want to compare the means of MMP3 with treatment 0 and treatment 5, to see if they are equal. We need to check assumptions first, if assumptions are met, we then apply two sample t test.
+2. Goal: We want to compare the means of MMP3 with treatment 0 and treatment 5 to see if they are equal. We need to check assumptions first, if assumptions are met, we then apply two sample t test.
 
 3. Code:
 
@@ -136,7 +139,7 @@ t.test(biomarker[biomarker$Treatment==0,"MMP3"], biomarker[biomarker$Treatment==
 Checking the assumptions is very important. If the normality check or the equal variance check fails, you need to use non-parametric methods Wilcoxon Rank Sum test, which will be introduced later. If only the equal variance check fails, you can use Welch's t test. You need to delete "var.equal = T" or change it to "var.equal = F" when you want to apply Welch's t test.
 
 ### Paired t test
-Paired t test is used to determine whether the mean difference between two sets of observations is zero. The null hypothesis H0: $\mu_d$ = 0, alternative hypotheis Ha:$\mu_d$ $\neq$ 0. Null hypothesis is rejected when p-value less than 0.05. Paired t test is a parametric method, which means that the assumptions must be satisfied before applying it. If assumptions cannot be met, non-parametric methods can be used.
+Paired t test is used to determine whether or not the **mean difference between two sets of observations ($\mu_d$)** is zero. The null hypothesis H0: $\mu_d$ = 0, alternative hypotheis Ha:$\mu_d$ $\neq$ 0. Null hypothesis is rejected when p-value less than 0.05. Paired t test is a parametric method, which means that the assumptions must be satisfied before applying it. If assumptions cannot be met, non-parametric methods can be used.
 
 1. Assumptions
     + Data (differences for the matched-pairs) are continous
