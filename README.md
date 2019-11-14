@@ -1,8 +1,10 @@
 ## R Tutorial for Choosing the Most Appropriate Test for Groups Comparing of Continuous Data
 
-### Data is [here](https://zhengyes.github.io/rt/)
+### Data is [here](https://raw.githubusercontent.com/zhengyes/rt/master/rTutorialData.csv)
 
-### Tests included
+### html page is [here](https://zhengyes.github.io/rt/)
+
+### Tests included in this tutorial
 * Two sample t-test
 * Paired t-test
 * ANOVA
@@ -19,4 +21,3 @@
   * Tukey
   * Dunn
 
-### html page is [here](https://zhengyes.github.io/rt/)
