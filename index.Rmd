@@ -39,7 +39,6 @@ graph TB
 ')
 ```
 
-
 ## Basics
 Before we start coding, let's cover some basics:
 
@@ -74,6 +73,7 @@ biomarker = read.csv("C:\\Users\\zs7hm\\Desktop\\rTutorialData.csv")
 <br/>
 
 ### How to test the normality
+
 Many statistical tests require data to be normally distributed. Normality can be formally tested using a Shapiro-Wilk normality test.
 
 The null hypothesis of the Shapiro-Wilk normality test is that there is no significant departure from normality. When the p-value is greater than 0.05, we fail to reject the null hypothesis and can assume normality. Parametric methods (two-sample t-test, paired t-test, ANOVA) require normality, while the non-parametric methods (Wilcoxon rank sum, signed rank, Kruskal) can be used when data are determined to be non-normal.
@@ -92,6 +92,7 @@ shapiro.test(biomarker[biomarker$Treatment==0,"MMP3"])
 <br/>
 
 ### How to test the equality of variances 
+
 Many statistical tests require the two groups of data have the same population variance. F test and Bartlett test can be used to check the equality of variances. The null hypothesis H0 of the equality of variances F test is that two normal populations have the same variance. When the p-value is greater than 0.05, we fail to reject the null hypothesis and can assume the equality of variances. 
 
 Here is an example. We are going to use the F-test to check if the biomarker MMP3 for treatment = 0 has the same population variance with MMP3 for treatment = 5.
@@ -119,8 +120,8 @@ If you randomly sample each set of items separately, under different conditions,
 <br/>
 <br/>
 
-
 ## Statistical Tests
+
 Now let us see the 6 tests we can use for groups comparison, they are the two-sample t-test, paired t-test, ANOVA (Analysis of Variance), Wilcoxon rank sum, Wilcoxon signed rank and the Kruskal-Wallis test. Note, the two-sample t-test, paired t-test and ANOVA are parametric tests which require meeting the normality assumption before using, while the Wilcoxon rank sum, Wilcoxon signed rank and Kruskal-Wallis test are non-parametric tests which have no distributional assumptions.
 
 ### Two-sample t-test
@@ -133,7 +134,7 @@ The two-sample t-test has the following **assumptions**:
     * Samples are independent
     * Data follow normal distribution
     * Variances for the two groups are equal
-  
+
 We want to compare the means of MMP3 for treatment = 0 and treatment = 5. We need to check assumptions first, if the assumptions are met, we then apply the two-sample t-test.
 
 #### Normality check for two-sample t-test:
@@ -154,6 +155,7 @@ shapiro.test(biomarker[biomarker$Treatment==0, "MMP3"])
 An F test is used to check if the two groups have the same variance. The null hypothesis H0 of the F test is that, two normal populations have the same variance, which is equivalent to the statement that the ratio of the two variances will equal to 1, and the alternative hypothesis Ha is that this ratio will not equal to 1. 
 
 Here the F-test p-value = 0.2597 which is greater than 0.05, so we fail to reject the null hypothesis H0 that ratio of the
+
 variances is 1. Therefore, the equal variance assumption is satisfied.
 ```{r,eval=FALSE}
 # Equal variance test
@@ -219,6 +221,7 @@ t.test(biomarker[biomarker$Treatment==0 & biomarker$Day==3, "KC"],
 <br/>
 
 ### One-way ANOVA
+
 ANOVA is used to compare means among more than two groups. The null hypothesis is that H0: $\mu_1$ = $\mu_2$ = $\mu_3$ =...= $\mu_k$, which indicates that all the group means are equal while the alternative hypothesis Ha indicates that at least one mean is not equal to the others. If the ANOVA test is significant, a post hoc test can tell us which group has different population mean. 
 
 **Assumptions**:
@@ -229,13 +232,13 @@ ANOVA is used to compare means among more than two groups. The null hypothesis i
     + Groups are independent
     + Each group is a simple random sample from its population
 
-
 We want to compare MMP3 group means for treatment = 0, treatment = 5 and treatment = 50. Assumptions need to be check first before applying one-way ANOVA.
 
 
 #### Normality check for ANOVA
 
 The Shapiro-Wilk test p-values for treatment = 0, 5 and 50 are 0.3694, 0.09077 and 0.4246 respectively, which are all greater than 0.05. We fail to reject null hypothesis H0 that all groups are normal, so all treatment groups are normally distributed.
+
 ```{r,eval=FALSE}
 # We need to check normality for all three treatment groups treatment = 0, 5 and 50. 
 shapiro.test(biomarker[biomarker$Treatment==0, "MMP3"])
@@ -252,6 +255,7 @@ shapiro.test(biomarker[biomarker$Treatment==50, "MMP3"])
 We use the Bartlett test to check the equality of variances for all three groups at the same time. The null hypothesis H0 for Bartlett test is that all population variances are equal across groups.
 
 The Bartlett test p-value = 0.4782 > 0.05, so we fail to reject the null hypothesis H0 that all three groups have equal variance. The assumptions are satisfied, we can continue to use ANOVA.
+
 ```{r,eval=FALSE}
 # Equal variance check. (You can still use var.test() which is F test, but you need to compare all the pairs. Using Bartlett test can make things easier because it makes multiple comparisons)
 bartlett.test(MMP3~Treatment,data=biomarker)
@@ -261,9 +265,11 @@ bartlett.test(MMP3~Treatment,data=biomarker)
 ```
 
 #### ANOVA
+
 Note that checking every assumption for a test is very important. If the normality check or equal variance assumption fails, you need to use the non-parametric [Kruskal-Wallis test](#kruskal-wallis), or you can use an adjustment for unequal variance.
 
 For the ANOVA code, you need to change the treatment variable into a factor variable so the analysis will run properly. After doing so we see the p-value = 0.00607 < 0.05, so we can reject the null hypothesis H0 that all three groups have the same mean and conclude that there is at least one group differ from the others. 
+
 ```{r,eval=FALSE}
 # ANOVA (Treatment is an integer in the data set, so we need to change it to a factor variable to complete the ANOVA analysis)
 a=aov(MMP3~as.factor(Treatment),data=biomarker)
@@ -275,9 +281,11 @@ summary(a)
 ```
 
 #### Post hoc (Tukey)
+
 The Tukey test can determine which mean is different than the others. The null hypothesis H0 for Tukey test is that all group means are equal.
 
 The Tukey test p-value for comparing means of treatment = 0 and treatment = 5 is 0.5079363 > 0.05, so we fail to reject the null hypothesis H0 that treatment = 0 and treatment = 5 have the same mean. The p-value for comparing means of treatment = 0 and treatment = 50 is 0.0951873 > 0.05, so we fail to reject the null hypothesis H0 that treatment =0 and treatment = 50 have the same mean. The p-value for comparing means of treatment = 5 and treatment = 50 is 0.0047412 < 0.05, so we reject the null hypothesis H0 that treatment = 5 and treatment = 50 have the same mean. The Tukey test reveals that the group means for treatment = 50 and treatment = 5 are significantly different. Because the lower bound and upper bound for the 95% confidence interval for the difference are both greater than 0 (lower bound (lwr) = 5.260493, upper bound (upr) = 35.086174), we can conclude that the group mean of treatment = 50 is significantly greater than the group mean of treatment = 5. We also conclude that there is no significant difference between group means for neither treatment = 5 and treatment = 0, nor for treatment = 50 and treatment = 0.
+
 ```{r,eval=FALSE}
 # Post hoc analysis. Tukey is a commonly used post hoc procedure.
 TukeyHSD(a)
@@ -355,6 +363,7 @@ Kruskal-Wallis test is a non-parametric alternative to a one-way ANOVA test, and
 We want to compare biomarker IL6 medians for treatment = 0, treatment = 5 and treatment = 50. If the Kruskal-Wallis test is significant, the post hoc Dunn test can be performed. The Dunn's test is a non-parametric pairwise multiple comparison test based on rank sums, it can help us to determine which group has a different median from the others.
 
 The p-value for Kruskal-Wallis test equals to 2.335e-06, which is less than 0.05. We reject the null hypothesis H0 that all groups have the same median. We conclude that not all groups have the same median, at least one group has a different median. 
+
 ```{r,eval=FALSE}
 kruskal.test(IL6~as.factor(Treatment),data = biomarker)
 ```
@@ -363,7 +372,7 @@ kruskal.test(IL6~as.factor(Treatment),data = biomarker)
 ```
 
 #### Post hoc (Dunn test)
-Since the Kruskal-Wallis test is significant, we can use the Dunn test to find the group which has different median. In order to use Dunn test in R, we need to install a package first. Type the following code in the RStudio console, and the package "FSA" will be installed automatically on your computer. 
+Since the Kruskal-Wallis test is significant, we can use the Dunn test to find the group which has the different median. In order to use Dunn test in R, we need to install a package first. Type the following code in the RStudio console, and the package "FSA" will be installed automatically on your computer. 
 
 ```{r,eval=FALSE}
 install.packages("FSA")

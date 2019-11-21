@@ -2901,8 +2901,8 @@ summary {
 
 <p><br /> <br /> <br /></p>
 <p>This tutorial will help you to determine the best test for your data. Here is the flowchart of choosing a statistical test for continuous data. It is recommended that you use RStudio for your analysis. Note that all code is case-sensitive.</p>
-<div id="htmlwidget-df1f10a83ba9dd50491b" style="width:672px;height:480px;" class="DiagrammeR html-widget"></div>
-<script type="application/json" data-for="htmlwidget-df1f10a83ba9dd50491b">{"x":{"diagram":"\ngraph TB\n  A[Continuous Data]-->B{Normally Distributed<br> or Skewed}\n  B-->C[Normally Distributed]\n  B-->H[Skewed]\n  C-->|2 groups| D{Paired<br>or Not Paired}\n  C-->|2+ groups| G[\"ANOVA\"]\n  D-->|unpaired| E[Two-sample t-test]\n  D-->|paired| F[Paired t-test]\n  H-->|2 groups| I{Paired<br> or Unpaired}\n  I-->|unpaired| J[Wilcoxon Rank Sum]\n  I-->|paired| K[Wilcoxon Signed Rank]\n  H-->|2+ groups| L[Kruskal-Wallis]\n  \n  style G fill:#c1f5f4\n  style E fill:#c1f5f4\n  style F fill:#c1f5f4\n  style J fill:#c1f5f4\n  style K fill:#c1f5f4\n  style L fill:#c1f5f4\n"},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-e5d0cd867ed008f89d0f" style="width:672px;height:480px;" class="DiagrammeR html-widget"></div>
+<script type="application/json" data-for="htmlwidget-e5d0cd867ed008f89d0f">{"x":{"diagram":"\ngraph TB\n  A[Continuous Data]-->B{Normally Distributed<br> or Skewed}\n  B-->C[Normally Distributed]\n  B-->H[Skewed]\n  C-->|2 groups| D{Paired<br>or Not Paired}\n  C-->|2+ groups| G[\"ANOVA\"]\n  D-->|unpaired| E[Two-sample t-test]\n  D-->|paired| F[Paired t-test]\n  H-->|2 groups| I{Paired<br> or Unpaired}\n  I-->|unpaired| J[Wilcoxon Rank Sum]\n  I-->|paired| K[Wilcoxon Signed Rank]\n  H-->|2+ groups| L[Kruskal-Wallis]\n  \n  style G fill:#c1f5f4\n  style E fill:#c1f5f4\n  style F fill:#c1f5f4\n  style J fill:#c1f5f4\n  style K fill:#c1f5f4\n  style L fill:#c1f5f4\n"},"evals":[],"jsHooks":[]}</script>
 <div id="basics" class="section level2">
 <h2>Basics</h2>
 <p>Before we start coding, let’s cover some basics:</p>
@@ -3005,7 +3005,8 @@ shapiro.test(biomarker[biomarker$Treatment==0, &quot;MMP3&quot;])</code></pre>
 <div id="equality-of-variances-for-two-sample-t-test" class="section level4">
 <h4>Equality of variances for two-sample t-test:</h4>
 <p>An F test is used to check if the two groups have the same variance. The null hypothesis H0 of the F test is that, two normal populations have the same variance, which is equivalent to the statement that the ratio of the two variances will equal to 1, and the alternative hypothesis Ha is that this ratio will not equal to 1.</p>
-<p>Here the F-test p-value = 0.2597 which is greater than 0.05, so we fail to reject the null hypothesis H0 that ratio of the variances is 1. Therefore, the equal variance assumption is satisfied.</p>
+<p>Here the F-test p-value = 0.2597 which is greater than 0.05, so we fail to reject the null hypothesis H0 that ratio of the</p>
+<p>variances is 1. Therefore, the equal variance assumption is satisfied.</p>
 <pre class="r"><code># Equal variance test
 var.test(biomarker[biomarker$Treatment==0,&quot;MMP3&quot;], biomarker[biomarker$Treatment==5,&quot;MMP3&quot;])</code></pre>
 <pre><code>## 
@@ -3232,7 +3233,7 @@ wilcox.test(biomarker[biomarker$Treatment==0 &amp; biomarker$Day==3, &quot;MMP9&
 ## Kruskal-Wallis chi-squared = 25.935, df = 2, p-value = 2.335e-06</code></pre>
 <div id="post-hoc-dunn-test" class="section level4">
 <h4>Post hoc (Dunn test)</h4>
-<p>Since the Kruskal-Wallis test is significant, we can use the Dunn test to find the group which has different median. In order to use Dunn test in R, we need to install a package first. Type the following code in the RStudio console, and the package “FSA” will be installed automatically on your computer.</p>
+<p>Since the Kruskal-Wallis test is significant, we can use the Dunn test to find the group which has the different median. In order to use Dunn test in R, we need to install a package first. Type the following code in the RStudio console, and the package “FSA” will be installed automatically on your computer.</p>
 <pre class="r"><code>install.packages(&quot;FSA&quot;)</code></pre>
 <p>The null hypothesis H0 for Dunn test is that there is no difference among all groups.</p>
 <p>The Dunn test p-value for comparing medians between treatment = 0 and treatment = 5 is 0.187 &gt; 0.05, we fail to reject the null hypothesis that treatment = 0 and treatment = 5 have the same median. The p-value for comparing medians between treatment = 0 and treatment = 50 is 0.000636 &lt; 0.05, so we reject the null hypothesis that treatment = 0 and treatment = 50 have the same median. The p-value for comparing medians between treatment = 5 and treatment = 50 is 0.0000026 &lt; 0.05, we reject the null hypothesis that treatment = 5 and treatment = 50 have the same median. We conclude that medians for treatment = 0 and treatment = 5 are not significantly different, while medians for treatment = 0 and treatment = 50 are significantly different, the medians for treatment = 5 and treatment = 50 are also significantly different.</p>
