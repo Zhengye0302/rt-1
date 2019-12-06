@@ -21,3 +21,4 @@
   * Tukey
   * Dunn
 
+### We also have a tutorial for logistic regression model, check the repository at [here](https://github.com/zhengyes/logRt), the html of it is at [here](https://zhengyes.github.io/logRt/)
